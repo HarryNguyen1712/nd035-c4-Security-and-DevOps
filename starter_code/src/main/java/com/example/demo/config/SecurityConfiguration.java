@@ -17,8 +17,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 @Configuration
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-  @Autowired
-  private UserDetailsService userDetailsService;
+  @Autowired private UserDetailsService userDetailsService;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -32,7 +31,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   }
 
   @Bean
-  public AuthenticationEntryPoint authenticationEntryPoint(){
+  public AuthenticationEntryPoint authenticationEntryPoint() {
     return new MyAuthenticationEntryPoint();
   }
 
@@ -55,6 +54,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         .and()
         .addFilter(new SecurityFilter(authenticationManager(), userDetailsService))
         .addFilter(new JwtAuthenticationFilter(authenticationManager()))
-        .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint());
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint());
   }
 }

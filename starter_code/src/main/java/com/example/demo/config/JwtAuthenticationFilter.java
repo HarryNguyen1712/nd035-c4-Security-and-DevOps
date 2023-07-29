@@ -6,6 +6,8 @@ import java.util.Date;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+  public static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
   private AuthenticationManager authenticationManager;
 
   public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
@@ -36,6 +39,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
       // Authenticate the user
       return authenticationManager.authenticate(authenticationToken);
     } catch (Exception e) {
+      log.error(e.getMessage());
       throw new RuntimeException(e);
     }
   }

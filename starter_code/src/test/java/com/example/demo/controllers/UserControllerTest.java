@@ -2,6 +2,8 @@ package com.example.demo.controllers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,6 +56,13 @@ public class UserControllerTest {
   public void testCreateUser() {
     when(bCryptPasswordEncoder.encode("password1")).thenReturn("thisIsHashed");
     CreateUserRequest createUserRequest = createUserRequest();
+    when(cartRepository.save(any())).thenReturn(new Cart());
+    User user = new User();
+    user.setId(0L);
+    user.setUsername("huyna1");
+    user.setPassword("thisIsHashed");
+    user.setCart(new Cart());
+    when(userRepository.save(any())).thenReturn(user);
     final ResponseEntity<User> response = userController.createUser(createUserRequest);
     assertNotNull(response);
     assertEquals(200, response.getStatusCodeValue());
@@ -79,6 +88,21 @@ public class UserControllerTest {
   }
 
   @Test
+  public void testFindUserByIdThrowException() {
+    when(userRepository.findById(0L)).thenThrow(new IllegalArgumentException());
+    assertThrows(IllegalArgumentException.class, () -> userController.findById(0L));
+  }
+
+  @Test
+  public void testFindUserByIdNotFound() {
+    User user = createUser();
+    when(userRepository.findById(0L)).thenReturn(Optional.empty());
+    final ResponseEntity<User> response = userController.findById(0L);
+    assertNotNull(response);
+    assertEquals(404, response.getStatusCodeValue());
+  }
+
+  @Test
   public void testFindUserByUsername() {
     User user = createUser();
     when(userRepository.findByUsername("huyna1")).thenReturn(user);
@@ -90,6 +114,24 @@ public class UserControllerTest {
     assertEquals(1, u.getId());
     assertEquals("huyna1", u.getUsername());
     assertEquals("thisIsHashed", u.getPassword());
+  }
+
+  @Test
+  public void testFindUserByNameNotFound() {
+    User user = createUser();
+    when(userRepository.findByUsername("huyna1")).thenReturn(null);
+    final ResponseEntity<User> response = userController.findById(0L);
+    assertNotNull(response);
+    assertEquals(404, response.getStatusCodeValue());
+  }
+
+  @Test
+  public void testFindUserByUsernameNotLogin() throws Exception {
+    mvc.perform(
+            MockMvcRequestBuilders.get("/api/user/{username}", "huyna1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
   }
 
   @Test

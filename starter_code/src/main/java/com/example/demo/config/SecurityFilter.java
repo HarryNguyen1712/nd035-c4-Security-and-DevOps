@@ -1,6 +1,5 @@
 package com.example.demo.config;
 
-
 import io.jsonwebtoken.Jwts;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,19 +16,20 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-
 public class SecurityFilter extends BasicAuthenticationFilter {
 
   private final UserDetailsService userDetailsService;
-  public SecurityFilter(AuthenticationManager authenticationManager,
-                        UserDetailsService userDetailsService) {
+
+  public SecurityFilter(
+      AuthenticationManager authenticationManager, UserDetailsService userDetailsService) {
     super(authenticationManager);
     this.userDetailsService = userDetailsService;
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                  FilterChain chain) throws IOException, ServletException {
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
     String header = request.getHeader("Authorization");
 
     if (header == null || !header.startsWith("Bearer ")) {
@@ -43,9 +43,9 @@ public class SecurityFilter extends BasicAuthenticationFilter {
   }
 
   @Override
-  protected void onUnsuccessfulAuthentication(HttpServletRequest request,
-                                              HttpServletResponse response,
-                                              AuthenticationException failed) throws IOException {
+  protected void onUnsuccessfulAuthentication(
+      HttpServletRequest request, HttpServletResponse response, AuthenticationException failed)
+      throws IOException {
     super.onUnsuccessfulAuthentication(request, response, failed);
   }
 
@@ -53,11 +53,12 @@ public class SecurityFilter extends BasicAuthenticationFilter {
     String token = request.getHeader("Authorization");
     if (token != null) {
       // Parse the token and extract the username
-      String username = Jwts.parser()
-          .setSigningKey("YourSecretKey")
-          .parseClaimsJws(token.replace("Bearer ", ""))
-          .getBody()
-          .getSubject();
+      String username =
+          Jwts.parser()
+              .setSigningKey("YourSecretKey")
+              .parseClaimsJws(token.replace("Bearer ", ""))
+              .getBody()
+              .getSubject();
       UserDetails user = userDetailsService.loadUserByUsername(username);
       if (user != null) {
         return new UsernamePasswordAuthenticationToken(username, null, new ArrayList<>());
